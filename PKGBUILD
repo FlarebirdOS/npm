@@ -1,12 +1,15 @@
 pkgname=npm
 pkgver=11.6.1
-pkgrel=1
+pkgrel=2
 pkgdesc="JavaScript package manager"
 arch=('x86_64')
 url="https://www.npmjs.com"
 license=('Artistic-2.0')
 depends=(
+    'node-gyp'
     'nodejs'
+    'nodejs-nopt'
+    'semver'
 )
 makedepends=(
     'git'
@@ -42,8 +45,14 @@ package() {
 
     echo 'globalconfig=/etc/npmrc' > ${pkgdir}${mod_dir}/npmrc
 
-    cd ${pkgdir}${mod_dir}/man
+    cd ${pkgdir}${mod_dir}
+    # Remove superfluous scripts
+    rm -r bin/{node-gyp-bin,np{m,x}{,.{cmd,ps1}}}
 
+    # Experimental dedup
+    rm -r node_modules/{node-gyp,nopt,semver}
+
+    cd man
     # Workaround for https://github.com/npm/cli/issues/780
     local name page sec title
     for page in man5/folders.5 \
