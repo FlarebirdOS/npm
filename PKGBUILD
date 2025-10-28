@@ -1,6 +1,6 @@
 pkgname=npm
-pkgver=11.6.1
-pkgrel=2
+pkgver=11.6.2
+pkgrel=3
 pkgdesc="JavaScript package manager"
 arch=('x86_64')
 url="https://www.npmjs.com"
@@ -17,7 +17,7 @@ makedepends=(
 )
 options=('!zipman')
 source=(git+ssh://git@github.com/npm/cli.git#tag=v${pkgver})
-sha256sums=(e227403e96633928007214461639754fbe7075cb20e5febb7dc73b16b7b98364)
+sha256sums=(55a9f6debc6a8d9569915c3f2f9092028d6480c00dff2094a27ec9eb2fc34a50)
 
 build() {
     cd cli
@@ -31,7 +31,7 @@ package() {
 
     local mod_dir=/usr/lib64/node_modules/${pkgname}
 
-    install -vdm755 ${pkgdir}/{usr/{bin,share/bash-completion/completions},${mod_dir}}
+    install -vdm755 ${pkgdir}{usr/{bin,share/bash-completion/completions},${mod_dir}}
 
     ln -s ${mod_dir}/bin/${pkgname}-cli.js ${pkgdir}/usr/bin/${pkgname}
 
