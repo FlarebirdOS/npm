@@ -1,6 +1,6 @@
 pkgname=npm
-pkgver=11.6.2
-pkgrel=3
+pkgver=11.7.0
+pkgrel=4
 pkgdesc="JavaScript package manager"
 arch=('x86_64')
 url="https://www.npmjs.com"
@@ -16,36 +16,32 @@ makedepends=(
     'jq'
 )
 options=('!zipman')
-source=(git+ssh://git@github.com/npm/cli.git#tag=v${pkgver})
-sha256sums=(55a9f6debc6a8d9569915c3f2f9092028d6480c00dff2094a27ec9eb2fc34a50)
+source=(npm-cli::git+ssh://git@github.com/npm/cli.git#tag=v${pkgver})
+sha256sums=(0c8f86be491fd566ebff726d63e886e8a50e8e8665183273e4d3ee7f3d543771)
 
 build() {
-    cd cli
+    cd npm-cli
 
     node scripts/resetdeps.js
     node . run build -w docs
 }
 
 package() {
-    cd cli
+    cd npm-cli
 
-    local mod_dir=/usr/lib64/node_modules/${pkgname}
+    local mod_dir=/usr/lib/node_modules/${pkgname}
 
-    install -vdm755 ${pkgdir}{usr/{bin,share/bash-completion/completions},${mod_dir}}
+    install -vdm755 ${pkgdir}/{usr/{bin,share/bash-completion/completions},${mod_dir}}
 
     ln -s ${mod_dir}/bin/${pkgname}-cli.js ${pkgdir}/usr/bin/${pkgname}
-
     ln -s ${mod_dir}/bin/npx-cli.js ${pkgdir}/usr/bin/npx
 
     mapfile -t mod_files < <(node . pack --ignore-scripts --dry-run --json | jq -r .[].files.[].path)
-
-    cp --parents -a ${mod_files[@]} ${pkgdir}${mod_dir}
-
+    cp --parents -a ${mod_files[@]} ${pkgdir}/${mod_dir}
     node . completion > ${pkgdir}/usr/share/bash-completion/completions/npm
+    echo 'globalconfig=/etc/npmrc' > ${pkgdir}/${mod_dir}/npmrc
 
-    echo 'globalconfig=/etc/npmrc' > ${pkgdir}${mod_dir}/npmrc
-
-    cd ${pkgdir}${mod_dir}
+    cd ${pkgdir}/${mod_dir}
     # Remove superfluous scripts
     rm -r bin/{node-gyp-bin,np{m,x}{,.{cmd,ps1}}}
 
@@ -55,10 +51,7 @@ package() {
     cd man
     # Workaround for https://github.com/npm/cli/issues/780
     local name page sec title
-    for page in man5/folders.5 \
-                man5/install.5 \
-                man7/*.7
-    do
+    for page in man5/folders.5 man5/install.5 man7/*.7; do
         sec=${page##*.}
         name=$(basename ${page} .${sec})
         title=${name@U}
